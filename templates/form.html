@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" xmlns="http://www.w3.org/1999/html">
+
+<head>
+    <meta charset="utf-8">
+    <script src="https://code.jquery.com/jquery-3.4.1.js"
+            integrity="sha256-WpOohJOqMqqyKL9FccASB9O0KwACQJpFTUBLTYOVvVU=" crossorigin="anonymous"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"
+            integrity="sha256-T0Vest3yCU7pafRw9r+settMBX6JkKN06dqBnpQ8d30=" crossorigin="anonymous"></script>
+    <link rel=stylesheet type=text/css href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+    <link rel="shortcut icon" href="data:image/x-icon;," type="image/x-icon">
+
+
+    <title>Saito Bid</title>
+
+</head>
+<style>
+    body{
+    background-repeat: no-repeat;
+    background-size:cover;
+    background-attached:fixed;
+    background-image: url({{url_for('static',filename='cart.jpg')}})
+    }
+</style>
+
+<body>
+
+<script type="text/javascript">
+  $(document).ready(function () {
+  setTimeout(function () {
+      $("div:visible[id*='msg']").fadeOut();
+}, 10000);
+});
+</script>
+
+<div class="container">
+{% with messages = get_flashed_messages(with_categories=true) %}
+{% if messages %}
+{% for category,msg in messages %}
+{% if category == 'success'%}
+  <div class="alert alert-success md-3" style="position: absolute; left: 42%;" id='msg' role="alert">{{msg}}</div>
+{% endif %}
+
+{% if category == 'error'%}
+    <div class="alert alert-danger md-3" style="position: absolute; left: 42%;" id="msg" role="alert">{{msg}}</div>
+{% endif %}
+
+{% endfor %}
+{% endif %}
+{% endwith %}
+</div>
+
+
+<br>
+
+<div class="column justify-content-left" style="margin-left:2.5em">
+
+    <form method='post'>
+<!--        onsubmit="myFunction()">-->
+
+        <div class="form-row">
+            <div class="col">
+                <h1>Saito Bid</h1>
+                <style>
+                h1{
+                position: relative;
+                left: 9%;
+                }
+
+                </style>
+            </div>
+        </div>
+
+        <div class="form-group" style="width: 30%;">
+            <label for="name">Full Name</label>
+            <input type="text" class="form-control" name="Uname" id=name for="register"
+                   placeholder="Please enter your full name" minlength="2" required pattern="[A-Za-z\s]+">
+            <small id="register" class="form-text text-muted">* You can only register once.</small>
+        </div>
+
+        <div>
+            <select required class="custom-select" name="choice" style="width: 30%;">
+                <option value="" selected hidden>Chose a device</option>
+                {% for device in device %}
+                <option>{{device}}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div style = "color:red; font-size:15px">
+        {{ message }}
+        </div>
+        <br>
+        <br>
+        <div class="form-check">
+            <input type="checkbox" class="form-check-input" id="exampleCheck1" required>
+            <label class="form-check-label" for="exampleCheck1">Confirmation of choice</label>
+        </div>
+        <div>
+            <h2>
+                <!--             style="margin-right:40em;border:solid black"-->
+                <table>
+                    <tr>
+                        {% for header in header %}
+                        <th>{{header}}</th>
+                        {% endfor %}
+                    </tr>
+
+                    {% for row in tablesqld %}
+                    <tr>
+                        {% for cell in row %}
+                        <td>{{cell}}</td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+
+                </table>
+            </h2>
+        </div>
+
+        <style>
+        h2{
+        position: absolute;
+        left: 34%;
+        top:10%;
+        }
+        table{
+        border: solid black;
+        font-size: 15px;
+        }
+        td{
+        text-align:center;
+        border: solid black;
+        padding: 5px 15px 2px;
+        }
+        th{
+        text-align:center;
+        padding: 1px 5px 4px;
+        }
+
+        </style>
+
+        <br>
+        <button type="submit" class="btn btn-primary">Submit
+        </button>
+    </form>
+
+</div>
+
+<script>
+function myFunction() {
+alert("Thank you, we received your order\nYou can exit now...");
+}
+</script>
+
+<script>
+    if ( window.history.replaceState ) {
+        window.history.replaceState( null, null, window.location.href );
+    }
+
+</script>
+</body>
+
+</html>
+
+<style>
+html, body {
+    max-width: 100%;
+    overflow-x: hidden;
+}
+</style>
