@@ -1,0 +1,106 @@
+from flask import Flask, render_template, request, session, flash
+from flask_sqlalchemy import SQLAlchemy
+import psycopg2
+
+
+def db_postgres(name, choice):
+    try:
+        conn = psycopg2.connect(
+            host='localhost',
+            database='postgres',
+            user='postgres',
+            password='123',
+            port='5432'
+        )
+        cur = conn.cursor()
+        cur.execute('''select quantity from stock Where device = %s''', (choice,))
+        quantity = cur.fetchall()[0][0]
+        if quantity > 0:
+            # save the selection - "person selection"
+            cur.execute('''SELECT MAX(ID) FROM selection''')
+            max_id = cur.fetchall()[0][0]
+            selection = '''INSERT INTO selection VALUES(%s, %s, %s)'''
+            cur.execute(selection, (max_id + 1, name, choice))
+            # Update the quantity of chosen device
+            update_quantity = '''UPDATE stock SET quantity = quantity-1 WHERE device = %s and quantity >= 1'''
+            changed_row = cur.execute(update_quantity, (choice,))
+            session["OrderSucceed"] = {'message': 'Your order have been received.',
+                                       'category': 'success'}
+            conn.commit()
+            conn.close()
+        else:
+            session["OrderSucceed"] = {'message': 'Sorry, the product is out of stock. Please try again',
+                                       'category': 'error'}
+    except Exception as error:
+        print(error)
+
+
+def table_view():
+    table_device = []
+    try:
+        conn = psycopg2.connect(
+            host='localhost',
+            database='postgres',
+            user='postgres',
+            password='123',
+            port='5432'
+        )
+        cur = conn.cursor()
+        table = '''update stock set stock = CASE WHEN (quantity > 0) THEN 'In Stock' ELSE 'Out of Stock' END'''
+        cur.execute(table)
+        table = '''select device, price, stock from stock ORDER BY id'''
+        cur.execute(table)
+        table_device = [i for i in cur.fetchall()]
+        conn.commit()
+        conn.close()
+
+    except Exception as error:
+        print(error)
+    return table_device
+
+
+def shop_list(device):
+    try:
+        conn = psycopg2.connect(
+            host='localhost',
+            database='postgres',
+            user='postgres',
+            password='123',
+            port='5432'
+        )
+        cur = conn.cursor()
+        device = '''SELECT device from stock where quantity>0'''
+        cur.execute(device)
+        device = [i[0] for i in cur.fetchall()]
+        conn.commit()
+        conn.close()
+    except Exception as error:
+        print(error)
+    return device
+
+
+app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:123@localhost/postgres'
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+app.secret_key = 'secret string'
+db = SQLAlchemy(app)
+
+
+@app.route('/', methods=['GET', 'POST'])
+def index():
+    if request.method == 'POST':
+        user_name = request.form['Uname']
+        choice = request.form['choice']
+        db_postgres(user_name, choice)
+    device = []
+    table_titles = ['Device', 'Price', 'In Stock']
+    devices = shop_list(device)
+    table = table_view()
+    if "OrderSucceed" in session:
+        flash(session["OrderSucceed"]["message"], session["OrderSucceed"]["category"])
+        session.pop("OrderSucceed", None)
+    return render_template('form.html', device=devices, tablesqld=table, header=table_titles)
+
+
+if __name__ == "__main__":
+    app.run(debug=True)
